@@ -25,7 +25,11 @@ public class TimesheetService {
   }
 
   public List<Timesheet> getAll() {
-    return repository.getAll();
+    return repository.getAll(null, null);
+  }
+  
+  public List<Timesheet> findAll(LocalDate createdAtBefore, LocalDate createdAtAfter) {
+    return repository.getAll(createdAtBefore, createdAtAfter);
   }
 
   public Optional<Timesheet> create(Timesheet timesheet) {
@@ -39,6 +43,10 @@ public class TimesheetService {
 
   public void delete(Long id) {
     repository.delete(id);
+  }
+
+  public List<Timesheet> findAll() {
+    return findAll(null, null);
   }
 
   public List<Timesheet> findByCreatedAtAfter(LocalDate date) {

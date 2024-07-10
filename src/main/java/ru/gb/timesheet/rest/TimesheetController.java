@@ -1,6 +1,5 @@
-package ru.gb.timesheet.controller;
+package ru.gb.timesheet.rest;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +8,7 @@ import ru.gb.timesheet.service.TimesheetService;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/timesheets")
@@ -34,34 +33,34 @@ public class TimesheetController {
     this.service = service;
   }
 
-  // /timesheets/{id}
   @GetMapping("/{id}") // получить все
   public ResponseEntity<Timesheet> get(@PathVariable Long id) {
-    Optional<Timesheet> ts = service.getById(id);
-
-    if (ts.isPresent()) {
-      // return ResponseEntity.ok().body(ts.get());
-      return ResponseEntity.status(HttpStatus.OK).body(ts.get());
-    }
-
-    return ResponseEntity.notFound().build();
+    return service.getById(id)
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
-  @GetMapping // получить все
-  public ResponseEntity<List<Timesheet>> getAll() {
-    return ResponseEntity.ok(service.getAll());
+  // /timesheets
+  // /timesheets?createdAtBefore=2024-07-09
+  // /timesheets?createdAtAfter=2024-07-15
+  // /timesheets?createdAtAfter=2024-07-15&createdAtBefore=2024-06-05
+  @GetMapping
+  public ResponseEntity<List<Timesheet>> getAll(
+      @RequestParam(required = false) LocalDate createdAtBefore,
+      @RequestParam(required = false) LocalDate createdAtAfter) {
+    return ResponseEntity.ok(service.findAll(createdAtBefore, createdAtAfter));
   }
+
+  // client -> [spring-server -> ... -> TimesheetController
+  // -> exceptionHandler(e)
+  // client <- [spring-server <- ...
 
   @PostMapping // создание нового ресурса
   public ResponseEntity<Timesheet> create(@RequestBody Timesheet timesheet) {
-    Optional<Timesheet> ts = service.create(timesheet);
-    if (ts.isPresent()) {
-      // 201 Created
-      return ResponseEntity.status(HttpStatus.CREATED).body(timesheet);
-    } else {
-      // 409 Conflict
-      return ResponseEntity.status(HttpStatus.CONFLICT).build();
-    }
+    final Timesheet created = service.create(timesheet).get();
+
+    // 201 Created
+    return ResponseEntity.status(HttpStatus.CREATED).body(created);
   }
 
   @DeleteMapping("/{id}")
@@ -72,18 +71,9 @@ public class TimesheetController {
     return ResponseEntity.noContent().build();
   }
 
-  @GetMapping("/createdAtAfter")
-  public ResponseEntity<List<Timesheet>> getTimesheetsCreatedAfter(
-      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdAtAfter) {
-    List<Timesheet> timesheets = service.findByCreatedAtAfter(createdAtAfter);
-    return ResponseEntity.ok(timesheets);
-  }
-
-  @GetMapping("/createdAtBefore")
-  public ResponseEntity<List<Timesheet>> getTimesheetsCreatedBefore(
-      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdAtBefore) {
-    List<Timesheet> timesheets = service.findByCreatedAtBefore(createdAtBefore);
-    return ResponseEntity.ok(timesheets);
+  @ExceptionHandler(NoSuchElementException.class)
+  public ResponseEntity<?> handleNoSuchElementException(NoSuchElementException e) {
+    return ResponseEntity.notFound().build();
   }
 
 }

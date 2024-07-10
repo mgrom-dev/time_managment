@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Repository // @Component для классов, работающих с данными
@@ -23,8 +24,20 @@ public class TimesheetRepository {
         .findFirst();
   }
 
-  public List<Timesheet> getAll() {
-    return List.copyOf(timesheets);
+  public List<Timesheet> getAll(LocalDate createdAtBefore, LocalDate createdAtAfter) {
+    Predicate<Timesheet> filter = it -> true;
+
+    if (Objects.nonNull(createdAtBefore)) {
+      filter = filter.and(it -> it.getCreatedAt().isBefore(createdAtBefore));
+    }
+
+    if (Objects.nonNull(createdAtAfter)) {
+      filter = filter.and(it -> it.getCreatedAt().isAfter(createdAtAfter));
+    }
+
+    return timesheets.stream()
+      .filter(filter)
+      .toList();
   }
 
   public Timesheet create(Timesheet timesheet) {
@@ -50,6 +63,12 @@ public class TimesheetRepository {
     return timesheets.stream()
         .filter(timesheet -> timesheet.getCreatedAt().isBefore(date))
         .collect(Collectors.toList());
+  }
+
+  public List<Timesheet> findByProjectId(Long projectId) {
+    return timesheets.stream()
+      .filter(it -> Objects.equals(it.getProjectId(), projectId))
+      .toList();
   }
 
 }
