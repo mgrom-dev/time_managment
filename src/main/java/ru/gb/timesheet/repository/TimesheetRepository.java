@@ -1,74 +1,126 @@
 package ru.gb.timesheet.repository;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import ru.gb.timesheet.model.Timesheet;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-@Repository // @Component для классов, работающих с данными
-public class TimesheetRepository {
+public interface TimesheetRepository extends JpaRepository<Timesheet, Long>
+/* , NamedEntityRepository<Timesheet, Long> */ {
 
-  private static Long sequence = 1L;
-  private final List<Timesheet> timesheets = new ArrayList<>();
+  // select * from timesheet where project_id = $1
+  // Note: сломается, если в БД результат выдает больше одного значения
+  // List<Timesheet> findByProjectId(Long projectId);
 
-  public Optional<Timesheet> getById(Long id) {
-    // select * from timesheets where id = $id
-    return timesheets.stream()
-        .filter(it -> Objects.equals(it.getId(), id))
-        .findFirst();
-  }
+  // default List<Timesheet> findByCreatedAtBetweenUnsafe(LocalDate min, LocalDate
+  // max) {
+  // if (min == null && max == null) {
+  // return findAll();
+  // } else if (min == null) {
+  // return findByCreatedAtLessThan(max);
+  // }
+  // }
 
-  public List<Timesheet> getAll(LocalDate createdAtBefore, LocalDate createdAtAfter) {
-    Predicate<Timesheet> filter = it -> true;
+  // select * from timesheet where created_at > $1 and created_at < $2
+  List<Timesheet> findByCreatedAtBetween(LocalDate min, LocalDate max);
 
-    if (Objects.nonNull(createdAtBefore)) {
-      filter = filter.and(it -> it.getCreatedAt().isBefore(createdAtBefore));
-    }
+  // select * from timesheet where project_id = $1
+  // order by created_at desc
+  // jql - java query language
+  @Query("select t from Timesheet t where t.projectId = :projectId order by t.createdAt desc")
+  List<Timesheet> findByProjectId(Long projectId);
 
-    if (Objects.nonNull(createdAtAfter)) {
-      filter = filter.and(it -> it.getCreatedAt().isAfter(createdAtAfter));
-    }
+  List<Timesheet> findByEmployeeId(Long projectId);
+  // @Query(nativeQuery = true, value = "select * from timesheet where project_id
+  // = :projectId")
+  // List<Long> findIdsByProjectId(Long projectId);
 
-    return timesheets.stream()
-      .filter(filter)
-      .toList();
-  }
+  // @Query(nativeQuery = true, value = "update timesheet set active = false where
+  // project_id = :projectId")
+  // @Modifying
+  // void deactivateTimesheetsWithProjectId(Long projectId);
 
-  public Timesheet create(Timesheet timesheet) {
-    timesheet.setId(sequence++);
-    timesheets.add(timesheet);
-    return timesheet;
-  }
+  // @Query("select t.id from Timesheet t where t.projectId = :projectId order by
+  // t.createdAt desc")
+  // List<Long> findIdsByProjectId(Long projectId);
 
-  public void delete(Long id) {
-    timesheets.stream()
-        .filter(it -> Objects.equals(it.getId(), id))
-        .findFirst()
-        .ifPresent(timesheets::remove); // если нет - иногда посылают 404 Not Found
-  }
+  // select * from timesheet where project_id = $1
+  // Note: сломается, если в БД результат выдает больше одного значения
+  // Optional<Timesheet> findByProjectId(Long projectId);
 
-  public List<Timesheet> findByCreatedAtAfter(LocalDate date) {
-    return timesheets.stream()
-        .filter(timesheet -> timesheet.getCreatedAt().isAfter(date))
-        .collect(Collectors.toList());
-  }
+  // select * from timesheet where project_id = $1
+  // order by created_at desc
+  // List<Timesheet> findByProjectIdOrderByCreatedAtDesc(Long projectId);
 
-  public List<Timesheet> findByCreatedAtBefore(LocalDate date) {
-    return timesheets.stream()
-        .filter(timesheet -> timesheet.getCreatedAt().isBefore(date))
-        .collect(Collectors.toList());
-  }
+  // select * from timesheet where project_id = $1 or minutes = $2
+  // List<Timesheet> findByProjectIdOrMinutes(Long projectId, Integer minutes);
 
-  public List<Timesheet> findByProjectId(Long projectId) {
-    return timesheets.stream()
-      .filter(it -> Objects.equals(it.getProjectId(), projectId))
-      .toList();
-  }
+  // ... where project_name like '%projectNameLike%'
+  // List<Timesheet> findByProjectNameLike(String projectNameLike);
 
 }
+
+// @Repository // @Component для классов, работающих с данными
+// public class TimesheetRepository {
+
+// private static Long sequence = 1L;
+// private final List<Timesheet> timesheets = new ArrayList<>();
+
+// public Optional<Timesheet> getById(Long id) {
+// // select * from timesheets where id = $id
+// return timesheets.stream()
+// .filter(it -> Objects.equals(it.getId(), id))
+// .findFirst();
+// }
+
+// public List<Timesheet> getAll(LocalDate createdAtBefore, LocalDate
+// createdAtAfter) {
+// Predicate<Timesheet> filter = it -> true;
+
+// if (Objects.nonNull(createdAtBefore)) {
+// filter = filter.and(it -> it.getCreatedAt().isBefore(createdAtBefore));
+// }
+
+// if (Objects.nonNull(createdAtAfter)) {
+// filter = filter.and(it -> it.getCreatedAt().isAfter(createdAtAfter));
+// }
+
+// return timesheets.stream()
+// .filter(filter)
+// .toList();
+// }
+
+// public Timesheet create(Timesheet timesheet) {
+// timesheet.setId(sequence++);
+// timesheets.add(timesheet);
+// return timesheet;
+// }
+
+// public void delete(Long id) {
+// timesheets.stream()
+// .filter(it -> Objects.equals(it.getId(), id))
+// .findFirst()
+// .ifPresent(timesheets::remove); // если нет - иногда посылают 404 Not Found
+// }
+
+// public List<Timesheet> findByCreatedAtAfter(LocalDate date) {
+// return timesheets.stream()
+// .filter(timesheet -> timesheet.getCreatedAt().isAfter(date))
+// .collect(Collectors.toList());
+// }
+
+// public List<Timesheet> findByCreatedAtBefore(LocalDate date) {
+// return timesheets.stream()
+// .filter(timesheet -> timesheet.getCreatedAt().isBefore(date))
+// .collect(Collectors.toList());
+// }
+
+// public List<Timesheet> findByProjectId(Long projectId) {
+// return timesheets.stream()
+// .filter(it -> Objects.equals(it.getProjectId(), projectId))
+// .toList();
+// }
+
+// }

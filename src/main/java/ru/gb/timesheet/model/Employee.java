@@ -13,13 +13,15 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @Entity
-@Table(name = "project")
-public class Project {
+@Table(name = "employee")
+public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @EqualsAndHashCode.Include
     Long id;
     String name;
+    String surname;
+    Integer age;
 
-    private List<Long> employees = new ArrayList<>();
+    private List<Long> projects = new ArrayList<>();
 }

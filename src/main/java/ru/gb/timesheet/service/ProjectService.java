@@ -23,27 +23,28 @@ public class ProjectService {
   }
 
   public Optional<Project> getById(Long id) {
-    return repository.getById(id);
+    return repository.findById(id);
   }
 
   public List<Project> getAll() {
-    return repository.getAll();
+    return repository.findAll();
   }
 
   public Project create(Project project) {
-    return repository.create(project);
+    return repository.save(project);
   }
 
   public void delete(Long id) {
-    repository.delete(id);
+    repository.deleteById(id);
   }
 
   public Optional<Project> update(Long id, Project updatedProject) {
-    return repository.update(id, updatedProject);
+    updatedProject.setId(id);
+    return Optional.of(repository.save(updatedProject));
   }
 
   public List<Timesheet> getTimesheets(Long id) {
-    if (repository.getById(id).isEmpty()) {
+    if (repository.findById(id).isEmpty()) {
       throw new NoSuchElementException("Project with id = " + id + " does not exists");
     }
 
