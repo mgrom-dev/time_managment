@@ -29,8 +29,8 @@ public class ProjectController {
 
   @Operation(summary = "Получить проект по ID", description = "Возвращает проект с указанным ID. Если проект не найден, возвращает 404.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Проект найден", content = @Content(mediaType = "application/json")),
-      @ApiResponse(responseCode = "404", description = "Проект не найден", content = @Content(mediaType = "application/json"))
+      @ApiResponse(responseCode = "200", description = "Проект найден", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Project.class))),
+      @ApiResponse(responseCode = "404", description = "Проект не найден", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Void.class)))
   })
   @Parameter(name = "id", description = "ID проекта", required = true, example = "1")
   @GetMapping("/{id}")
@@ -40,6 +40,12 @@ public class ProjectController {
         .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
+  @Operation(summary = "Получить расписание проекта", description = "Возвращает список с расписанием для проекта с указанным ID. Если проект не найден, возвращает 404.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Расписание проекта найдено", content = @Content(mediaType = "application/json")),
+      @ApiResponse(responseCode = "404", description = "Расписание для проекта на найдено", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Void.class)))
+  })
+  @Parameter(name = "id", description = "ID проекта", required = true, example = "1")
   @GetMapping("/{id}/timesheets")
   public ResponseEntity<List<Timesheet>> getTimesheets(@PathVariable Long id) {
     try {
@@ -49,16 +55,29 @@ public class ProjectController {
     }
   }
 
+  @Operation(summary = "Получить список проектов", description = "Возвращает список всех проектов.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Список проектов найден", content = @Content(mediaType = "application/json")),
+  })
   @GetMapping
   public ResponseEntity<List<Project>> getAll() {
     return ResponseEntity.ok(service.getAll());
   }
 
+  @Operation(summary = "Создать новый проект", description = "Создает новый проект и возвращает его с присвоенным ID.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "201", description = "Проект создан", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Project.class))),
+  })
   @PostMapping
   public ResponseEntity<Project> create(@RequestBody Project project) {
     return ResponseEntity.status(HttpStatus.CREATED).body(service.create(project));
   }
 
+  @Operation(summary = "Удалить проект", description = "Удаляет проект с указанным ID. Если проект не найден, возвращает 404.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "204", description = "Проект удален"),
+  })
+  @Parameter(name = "id", description = "ID проекта", required = true, example = "1")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(@PathVariable Long id) {
     service.delete(id);
