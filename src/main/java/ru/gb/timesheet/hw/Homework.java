@@ -1,16 +1,37 @@
 package ru.gb.timesheet.hw;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 public class Homework {
 
-  // 1. Подключить сваггер к своему проекту (который мы делаем, т.е. с проектами,
-  // таймшитами и тд)
-  // (подключить в Pom.xml
-  // <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>).
-  // 2. Добавить описание ручек (название на русском языке + описание, что делают)
-  // 3. ** Описать параметры и возвращаемые типы данных.
+  /**
+   * 1. В LoggingAspect добавить логирование типов и значений аргументов.
+   * Например (пример вывода): TimesheetService.findById(Long = 3)
+   * Эту информацию можно достать из joinPoint.getArgs()
+   *
+   * 2. * Создать аспект, который аспектирует методы, помеченные аннотацией Recover, и делает следующее:
+   * 2.1 Если в процессе исполнения метода был exception (любой),
+   * то его нужно залогировать ("Recovering TimesheetService#findById after Exception[RuntimeException.class, "exception message"]")
+   * и вернуть default-значение наружу Default-значение: для примитивов значение по умолчанию, для ссылочных типов - null.
+   * Для void-методов возвращать не нужно.
+   *
+   * 3. **** В аннотацию Recover добавить атрибут Class<?>[] noRecoverFor, в которое можно записать список классов исключений,
+   * которые НЕ нужно отлавливать.
+   * Это вхождение должно учитывать иерархию классов.
+   *
+   * Пример:
+   * @Recover(noRecoverFor = {NoSuchElementException.class, IllegalStateException.class})
+   * public Timesheet getById(Long id) {...}
+   *
+   */
 
-  // В качестве домашки прислать скриншот(ы) OpenAPI-страницы (которая красивая).
-  // Не нужно присылать 10+ скриншотов, достаточно тех, по которым понятно, что
-  // работа сделана.
-
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.METHOD)
+  public @interface Recover { // recover - восстанавливать
+//    Class<?>[] noRecoverFor() default {};
+  }
+  
 }
