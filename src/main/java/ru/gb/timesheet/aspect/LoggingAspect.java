@@ -2,6 +2,9 @@ package ru.gb.timesheet.aspect;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
@@ -25,15 +28,17 @@ public class LoggingAspect {
 
   @Pointcut("execution(* ru.gb.timesheet.service.TimesheetService.*(..))")
   public void timesheetServiceMethodsPointcut() {
-    System.out.println("ok");
   }
 
   // Pointcut - точка входа в аспект
   @Before(value = "timesheetServiceMethodsPointcut()")
   public void beforeTimesheetServiceFindById(JoinPoint jp) {
     String methodName = jp.getSignature().getName();
-    log.info("Before -> TimesheetService#{}", methodName);
-    System.out.println("ok2");
+    String argsString = Arrays.stream(jp.getArgs())
+                .filter(arg -> arg != null)
+                .map(arg -> arg.getClass().getSimpleName() + " = " + arg.toString())
+                .collect(Collectors.joining(", "));
+    log.info("Before -> TimesheetService.{}({})", methodName, argsString);
   }
 
   @AfterThrowing(value = "timesheetServiceMethodsPointcut()", throwing = "ex")
