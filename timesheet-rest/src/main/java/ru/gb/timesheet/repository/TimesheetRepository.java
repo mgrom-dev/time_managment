@@ -2,6 +2,8 @@ package ru.gb.timesheet.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import ru.gb.timesheet.model.Timesheet;
 
 import java.time.LocalDate;
@@ -23,8 +25,8 @@ public interface TimesheetRepository extends JpaRepository<Timesheet, Long>
   // }
   // }
 
-  // select * from timesheet where created_at > $1 and created_at < $2
-  List<Timesheet> findByCreatedAtBetween(LocalDate min, LocalDate max);
+  @Query("SELECT t FROM Timesheet t WHERE (t.createdAt BETWEEN :min AND :max) OR t.createdAt IS NULL")
+  List<Timesheet> findByCreatedAtBetween(@Param("min") LocalDate min, @Param("max") LocalDate max);
 
   // select * from timesheet where project_id = $1
   // order by created_at desc

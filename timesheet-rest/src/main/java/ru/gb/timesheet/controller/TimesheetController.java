@@ -64,6 +64,13 @@ public class TimesheetController {
     return ResponseEntity.status(HttpStatus.CREATED).body(created);
   }
 
+  @PutMapping("/{id}") // обновить конкретную запись по идентификатору
+  public ResponseEntity<Timesheet> update(@PathVariable Long id, @RequestBody Timesheet timesheet) {
+    return service.update(id, timesheet)
+        .map(updatedTimesheet -> ResponseEntity.ok().body(updatedTimesheet))
+        .orElseGet(() -> ResponseEntity.notFound().build());
+  }
+
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(@PathVariable Long id) {
     service.delete(id);

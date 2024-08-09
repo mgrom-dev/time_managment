@@ -42,7 +42,7 @@ public class TimesheetService {
     return timesheetRepository.findByCreatedAtBetween(createdAtAfter, createdAtBefore);
   }
 
-  @Recover(noRecoverFor = {NoSuchElementException.class})
+  @Recover(noRecoverFor = { NoSuchElementException.class })
   public Optional<Timesheet> create(Timesheet timesheet) {
     if (Objects.isNull(timesheet.getProjectId())) {
       throw new IllegalArgumentException("projectId must not be null");
@@ -53,6 +53,11 @@ public class TimesheetService {
     }
 
     timesheet.setCreatedAt(LocalDate.now());
+    return Optional.of(timesheetRepository.save(timesheet));
+  }
+
+  public Optional<Timesheet> update(Long id, Timesheet timesheet) {
+    timesheet.setId(id);
     return Optional.of(timesheetRepository.save(timesheet));
   }
 
