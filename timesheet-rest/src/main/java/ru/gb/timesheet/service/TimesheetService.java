@@ -2,13 +2,14 @@ package ru.gb.timesheet.service;
 
 import org.springframework.stereotype.Service;
 
-import ru.gb.timesheet.aspect.Recover;
-import ru.gb.timesheet.aspect.Timer;
+import ru.gb.aspect.logging.Logging;
+import ru.gb.aspect.logging.Recover;
+// import ru.gb.timesheet.aspect.Timer;
 import ru.gb.timesheet.model.Timesheet;
 import ru.gb.timesheet.repository.ProjectRepository;
 import ru.gb.timesheet.repository.TimesheetRepository;
 
-import org.slf4j.event.Level;
+// import org.slf4j.event.Level;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -17,7 +18,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service // то же самое, что и Component
-@Timer(level = Level.TRACE)
+// @Timer(level = Level.TRACE)
+@Logging
 public class TimesheetService {
 
   private final TimesheetRepository timesheetRepository;
@@ -42,7 +44,7 @@ public class TimesheetService {
     return timesheetRepository.findByCreatedAtBetween(createdAtAfter, createdAtBefore);
   }
 
-  @Recover(noRecoverFor = { NoSuchElementException.class })
+  @Recover
   public Optional<Timesheet> create(Timesheet timesheet) {
     if (Objects.isNull(timesheet.getProjectId())) {
       throw new IllegalArgumentException("projectId must not be null");

@@ -13,6 +13,7 @@
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
+		<module>logging-starter</module>
 		<module>timesheet-rest</module>
 		<module>timesheet-page</module>
         <module>eureka-server</module>

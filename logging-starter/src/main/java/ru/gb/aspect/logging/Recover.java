@@ -1,4 +1,4 @@
-package ru.gb.timesheet.aspect;
+package ru.gb.aspect.logging;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
